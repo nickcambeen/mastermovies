@@ -4,211 +4,246 @@
 "id": "staar-03",
 "file": "clips/staar-wars-03.mp3",
 "name": "Ey Henk",
-"at": "0:08"
+"at": "0:08",
+"dur": 3.97
 },
 {
 "id": "staar-04",
 "file": "clips/staar-wars-04.mp3",
 "name": "Ik moet nodig schijten",
-"at": "0:12"
+"at": "0:12",
+"dur": 2.04
 },
 {
 "id": "staar-05",
 "file": "clips/staar-wars-05.mp3",
 "name": "Henk",
-"at": "0:15"
+"at": "0:15",
+"dur": 1.52
 },
 {
 "id": "staar-06",
 "file": "clips/staar-wars-06.mp3",
 "name": "De hele wc zit verstopt",
-"at": "0:16"
+"at": "0:16",
+"dur": 3.79
 },
 {
 "id": "staar-10",
 "file": "clips/staar-wars-10.mp3",
 "name": "Jouw moeder",
-"at": "0:31"
+"at": "0:31",
+"dur": 3.42
 },
 {
 "id": "staar-11",
 "file": "clips/staar-wars-11.mp3",
 "name": "Reetveter",
-"at": "0:34"
+"at": "0:34",
+"dur": 1.52
 },
 {
 "id": "staar-12",
 "file": "clips/staar-wars-12.mp3",
 "name": "Fucking awesome",
-"at": "0:36"
+"at": "0:36",
+"dur": 5.67
 },
 {
 "id": "staar-14",
 "file": "clips/staar-wars-14.mp3",
 "name": "Huhhh",
-"at": "0:44"
+"at": "0:44",
+"dur": 3.5
 },
 {
 "id": "staar-15",
 "file": "clips/staar-wars-15.mp3",
 "name": "Hij doet het niet",
-"at": "0:48"
+"at": "0:48",
+"dur": 1.15
 },
 {
 "id": "staar-16",
 "file": "clips/staar-wars-16.mp3",
 "name": "Je verneukt het weer",
-"at": "0:49"
+"at": "0:49",
+"dur": 4.23
 },
 {
 "id": "staar-17",
 "file": "clips/staar-wars-17.mp3",
 "name": "Ey rustic man",
-"at": "0:53"
+"at": "0:53",
+"dur": 3.84
 },
 {
 "id": "staar-18",
 "file": "clips/staar-wars-18.mp3",
 "name": "Follow the leader",
-"at": "0:57"
+"at": "0:57",
+"dur": 4.96
 },
 {
 "id": "staar-20",
 "file": "clips/staar-wars-20.mp3",
 "name": "Volgens mij zag ik daar een ster",
-"at": "1:06"
+"at": "1:06",
+"dur": 3.55
 },
 {
 "id": "staar-21",
 "file": "clips/staar-wars-21.mp3",
 "name": "Wat is er",
-"at": "1:09"
+"at": "1:09",
+"dur": 2.8
 },
 {
 "id": "staar-22",
 "file": "clips/staar-wars-22.mp3",
 "name": "Nee dat kan niet",
-"at": "1:12"
+"at": "1:12",
+"dur": 2.17
 },
 {
 "id": "staar-23",
 "file": "clips/staar-wars-23.mp3",
 "name": "Alle wc's zitten toch helemaal verstopt",
-"at": "1:14"
+"at": "1:14",
+"dur": 3.53
 },
 {
 "id": "staar-24",
 "file": "clips/staar-wars-24.mp3",
 "name": "Ja maar meneer",
-"at": "1:17"
+"at": "1:17",
+"dur": 4.73
 },
 {
 "id": "staar-25",
 "file": "clips/staar-wars-25.mp3",
 "name": "Moet je ook schijten?",
-"at": "1:22"
+"at": "1:22",
+"dur": 1.25
 },
 {
 "id": "staar-26",
 "file": "clips/staar-wars-26.mp3",
 "name": "Ja eigenlijk wel",
-"at": "1:23"
+"at": "1:23",
+"dur": 2.53
 },
 {
 "id": "staar-27",
 "file": "clips/staar-wars-27.mp3",
 "name": "Ah fuck",
-"at": "1:25"
+"at": "1:25",
+"dur": 4.13
 },
 {
 "id": "staar-28",
 "file": "clips/staar-wars-28.mp3",
 "name": "Huaahahh",
-"at": "1:29"
+"at": "1:29",
+"dur": 1.41
 },
 {
 "id": "staar-30",
 "file": "clips/staar-wars-30.mp3",
 "name": "Ahhhh",
-"at": "1:32"
+"at": "1:32",
+"dur": 5.69
 },
 {
 "id": "staar-31",
 "file": "clips/staar-wars-31.mp3",
 "name": "Ha ha ha ha",
-"at": "1:38"
+"at": "1:38",
+"dur": 4.73
 },
 {
 "id": "staar-32",
 "file": "clips/staar-wars-32.mp3",
 "name": "Ha ha ha ha 2",
-"at": "1:42"
+"at": "1:42",
+"dur": 5.36
 },
 {
 "id": "staar-33",
 "file": "clips/staar-wars-33.mp3",
 "name": "Genoeg gelachen",
-"at": "1:48"
+"at": "1:48",
+"dur": 1.59
 },
 {
 "id": "staar-34",
 "file": "clips/staar-wars-34.mp3",
 "name": "Maar, was wel lachen he",
-"at": "1:49"
+"at": "1:49",
+"dur": 1.88
 },
 {
 "id": "staar-35",
 "file": "clips/staar-wars-35.mp3",
 "name": "Was helemaal nie grappig",
-"at": "1:52"
+"at": "1:52",
+"dur": 1.57
 },
 {
 "id": "staar-36",
 "file": "clips/staar-wars-36.mp3",
 "name": "Hou je klep",
-"at": "1:54"
+"at": "1:54",
+"dur": 2.95
 },
 {
 "id": "staar-37",
 "file": "clips/staar-wars-37.mp3",
 "name": "Ik ben niet alleen een komiek",
-"at": "1:57"
+"at": "1:57",
+"dur": 4.05
 },
 {
 "id": "staar-38",
 "file": "clips/staar-wars-38.mp3",
 "name": "Je oma ja",
-"at": "2:01"
+"at": "2:01",
+"dur": 5.46
 },
 {
 "id": "staar-39",
 "file": "clips/staar-wars-39.mp3",
 "name": "Neeee",
-"at": "2:06"
+"at": "2:06",
+"dur": 4.99
 },
 {
 "id": "staar-40",
 "file": "clips/staar-wars-40.mp3",
 "name": "Das nie waar",
-"at": "2:11"
+"at": "2:11",
+"dur": 2.66
 },
 {
 "id": "staar-41",
 "file": "clips/staar-wars-41.mp3",
 "name": "Ik heb geen oma",
-"at": "2:13"
+"at": "2:13",
+"dur": 2.64
 },
 {
 "id": "staar-42",
 "file": "clips/staar-wars-42.mp3",
 "name": "Maar ja, is toch waar he",
-"at": "2:15"
+"at": "2:15",
+"dur": 6.48
 },
 {
 "id": "staar-43-44",
 "file": "clips/staar-wars-43-44.mp3",
 "name": "Ik hoop dat je zal branden",
-"at": "2:21"
+"at": "2:21",
+"dur": 6.32
 }
 ],
 "remove": [

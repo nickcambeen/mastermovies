@@ -96,6 +96,9 @@ input[type=range]{accent-color:var(--accent);width:110px}
 .pad .chk{width:22px;height:22px;accent-color:#140f08}
 .pad.marked{filter:grayscale(1) brightness(.55)}
 .pad .nm{margin:0 8px 8px;width:calc(100% - 16px);background:rgba(255,255,255,.55);border:none;border-radius:6px;padding:5px 7px;font:600 13px var(--f-body);color:#140f08}
+.ro .edit-only{display:none!important}
+html:not(.ro) .ro-only{display:none!important}
+.sub kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--fg)}
 .pad .pl{background:rgba(0,0,0,.25);color:#fff;border:none;padding:4px 9px;font-size:12px;border-radius:6px}
 </style>
 
@@ -103,10 +106,11 @@ input[type=range]{accent-color:var(--accent);width:110px}
   <header>
     <div>
       <h1>Master<span>board</span></h1>
-      <p class="sub">Je eigen soundboard met quotes en geluiden uit Mastermovies-video's. Sleep een audio- of videofragment hierheen, knip het stuk dat je wilt en geef het een toets.</p>
+      <p class="sub edit-only">Je eigen soundboard met quotes en geluiden uit Mastermovies-video's. Sleep een audio- of videofragment hierheen, knip het stuk dat je wilt en geef het een toets.</p>
+      <p class="sub ro-only">Quotes uit Mastermovies-video's. Tik op een pad of druk op de toets; <kbd>Spatie</kbd> stopt alles.</p>
     </div>
     <div class="transport">
-      <label class="btn primary" for="file">＋ Geluid toevoegen<input id="file" type="file" accept="audio/*,video/*" multiple></label>
+      <label class="btn primary edit-only" for="file">＋ Geluid toevoegen<input id="file" type="file" accept="audio/*,video/*" multiple></label>
       <button class="stop" id="stopAll" title="Spatie">■ Stop alles</button>
       <span class="lbl">Volume</span><input id="vol" type="range" min="0" max="1" step="0.01" value="0.9" aria-label="Volume">
       <label class="check"><input id="overlap" type="checkbox" checked> Overlappen</label>
@@ -116,7 +120,7 @@ input[type=range]{accent-color:var(--accent);width:110px}
   <div class="toolbar">
     <input class="search" id="q" type="search" placeholder="Zoek een geluid…" aria-label="Zoeken">
     <span class="notice" id="notice"></span>
-    <button id="selToggle">☑ Opschonen</button>
+    <button id="selToggle" class="edit-only">☑ Opschonen</button>
   </div>
   <div class="selbar" id="selbar" hidden>
     <span><b id="selCount">0</b> aangevinkt om te verwijderen. Typ ook gerust een naam in een pad.</span>
@@ -131,7 +135,7 @@ input[type=range]{accent-color:var(--accent);width:110px}
 
   <div class="grid" id="grid"></div>
 
-  <p class="help">Tips: druk de toets op een pad om af te spelen, <kbd>Spatie</kbd> stopt alles. Ook video's (.mp4, .mov, .webm) werken: alleen het geluid wordt gebruikt. Geluiden blijven bewaard in deze browser op dit apparaat. Fragmenten haal je zelf uit de video's, bijvoorbeeld met een schermopname of een audio-editor.</p>
+  <p class="help edit-only">Tips: druk de toets op een pad om af te spelen, <kbd>Spatie</kbd> stopt alles. Ook video's (.mp4, .mov, .webm) werken: alleen het geluid wordt gebruikt. Geluiden blijven bewaard in deze browser op dit apparaat. Fragmenten haal je zelf uit de video's, bijvoorbeeld met een schermopname of een audio-editor.</p>
 </div>
 
 <div class="drop" id="drop" hidden>Laat los om toe te voegen</div>
@@ -169,6 +173,8 @@ input[type=range]{accent-color:var(--accent);width:110px}
 </div>
 
 <script>
+const EDIT=false; // false = alleen afspelen; de set komt uit clips/presets.json
+if(!EDIT)document.documentElement.classList.add("ro");
 const COLORS=["#ffb12b","#ff6f4e","#ff8fb1","#c8a2ff","#6fb8ff","#4fd6b3","#a8e05f","#f2e8d5"];
 const KEYS="1234567890QWERTYUIOPASDFGHJKLZXCVBNM".split("");
 const $=id=>document.getElementById(id);
@@ -177,7 +183,7 @@ let ctx, master, sounds=[], buffers=new Map(), playing=new Map(), editing=null, 
 /* ---------- audio ---------- */
 function ac(){if(!ctx){ctx=new (window.AudioContext||window.webkitAudioContext)();master=ctx.createGain();master.gain.value=+$("vol").value;master.connect(ctx.destination);}if(ctx.state==="suspended")ctx.resume();return ctx;}
 async function decode(blob){const ab=await blob.arrayBuffer();return await new Promise((res,rej)=>ac().decodeAudioData(ab,res,rej));}
-async function getBuf(s){if(buffers.has(s.id))return buffers.get(s.id);const b=s.demo?makeDemo(s.demo):await decode(s.blob);buffers.set(s.id,b);return b;}
+async function getBuf(s){if(buffers.has(s.id))return buffers.get(s.id);const b=s.demo?makeDemo(s.demo):await decode(s.blob||await (await fetch(s.url)).blob());buffers.set(s.id,b);return b;}
 function stopId(id){(playing.get(id)||[]).forEach(p=>{try{p.src.stop()}catch(e){}});playing.delete(id);}
 function stopAll(){[...playing.keys()].forEach(stopId);stopPreview();}
 async function play(s){
@@ -231,11 +237,12 @@ function render(){
       el.querySelector(".nm").addEventListener("change",async e=>{const v=e.target.value.trim();if(v){s.name=v;await dbPut(s)}});
       g.appendChild(el)});$("selCount").textContent=marked.size;return}
   list.forEach(s=>{const el=document.createElement("div");el.className="pad";el.dataset.id=s.id;el.style.setProperty("--pc",s.color);el.tabIndex=0;el.setAttribute("role","button");el.setAttribute("aria-label","Speel "+s.name);
-    const dur=s.demo?"":(s.src?"@"+s.src+" · ":"")+fmt((s.end||0)-(s.start||0));
-    el.innerHTML=`<div class="top"><span class="key">${s.key||"·"}</span>${s.demo?'<span class="tag">Voorbeeld</span>':""}</div>${s.demo?"":'<button class="edit" aria-label="Bewerk">Bewerk</button>'}<div><div class="dur">${dur}</div><div class="name">${esc(s.name)}</div></div><div class="prog"></div>`;
+    const dur=s.demo?"":(s.src?"@"+s.src+" · ":"")+fmt(s.dur??((s.end||0)-(s.start||0)));
+    el.innerHTML=`<div class="top"><span class="key">${s.key||"·"}</span>${s.demo?'<span class="tag">Voorbeeld</span>':""}</div>${s.demo||!EDIT?"":'<button class="edit" aria-label="Bewerk">Bewerk</button>'}<div><div class="dur">${dur}</div><div class="name">${esc(s.name)}</div></div><div class="prog"></div>`;
     el.addEventListener("click",e=>{if(e.target.closest(".edit")){openEditor(s);return}play(s)});
     el.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();play(s)}});
     g.appendChild(el)});
+  if(!EDIT){notice(own().length?`${own().length} geluiden`:"Geluiden laden…");return}
   notice(own().length?`${own().length} geluid${own().length===1?"":"en"}`:"<b>Voorbeeldpads.</b> Voeg je eerste fragment toe, dan verdwijnen deze.",true);
 }
 function notice(t,html){html?$("notice").innerHTML=t:$("notice").textContent=t}
@@ -254,10 +261,10 @@ async function addFiles(files){
 }
 $("file").addEventListener("change",e=>{addFiles([...e.target.files]);e.target.value=""});
 let dragN=0;
-addEventListener("dragenter",e=>{if([...e.dataTransfer.types].includes("Files")){dragN++;$("drop").hidden=false}});
+addEventListener("dragenter",e=>{if(EDIT&&[...e.dataTransfer.types].includes("Files")){dragN++;$("drop").hidden=false}});
 addEventListener("dragleave",()=>{if(--dragN<=0){dragN=0;$("drop").hidden=true}});
 addEventListener("dragover",e=>e.preventDefault());
-addEventListener("drop",e=>{e.preventDefault();dragN=0;$("drop").hidden=true;addFiles([...e.dataTransfer.files])});
+addEventListener("drop",e=>{e.preventDefault();dragN=0;$("drop").hidden=true;if(EDIT)addFiles([...e.dataTransfer.files])});
 
 /* ---------- editor ---------- */
 let ed={};
@@ -331,11 +338,21 @@ addEventListener("keydown",e=>{
 (async()=>{
   try{const v=localStorage.getItem("mb-vol");if(v)$("vol").value=v;const o=localStorage.getItem("mb-ov");if(o)$("overlap").checked=o==="1"}catch(_){}
   render();
+  if(!EDIT){await loadReadOnly();return}
   db=await openDB();
   if(!db){notice("Opslaan lukt niet in deze browser; geluiden blijven alleen staan tot je de pagina sluit.");return}
   sounds=(await dbAll()||[]).sort((a,b)=>a.created-b.created);render();
   await seedPresets();
 })();
+
+/* ---------- alleen-afspelen: set rechtstreeks uit presets.json ---------- */
+async function loadReadOnly(){
+  let data;try{data=await (await fetch("clips/presets.json",{cache:"no-cache"})).json()}catch(e){notice("De geluiden konden niet worden geladen. Herlaad de pagina.");return}
+  const list=Array.isArray(data)?data:(data.clips||[]);
+  sounds=list.map((p,i)=>({id:p.id,name:p.name,src:p.at,dur:p.dur,url:p.file,color:COLORS[i%COLORS.length],key:KEYS[i]||"",start:0,end:p.dur||0,gain:1}));
+  render();
+  for(const s of sounds){try{await getBuf(s)}catch(e){}} // vooraf laden voor snelle start
+}
 
 /* ---------- meegeleverde fragmenten ---------- */
 async function seedPresets(){
