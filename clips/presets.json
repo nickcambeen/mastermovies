@@ -1,18 +1,6 @@
 {
 "clips": [
 {
-"id": "staar-01",
-"file": "clips/staar-wars-01.mp3",
-"name": "Staar Wars 01",
-"at": "0:00"
-},
-{
-"id": "staar-02",
-"file": "clips/staar-wars-02.mp3",
-"name": "Staar Wars 02",
-"at": "0:02"
-},
-{
 "id": "staar-03",
 "file": "clips/staar-wars-03.mp3",
 "name": "Ey Henk",
@@ -37,24 +25,6 @@
 "at": "0:16"
 },
 {
-"id": "staar-07",
-"file": "clips/staar-wars-07.mp3",
-"name": "Staar Wars 07",
-"at": "0:20"
-},
-{
-"id": "staar-08",
-"file": "clips/staar-wars-08.mp3",
-"name": "Staar Wars 08",
-"at": "0:24"
-},
-{
-"id": "staar-09",
-"file": "clips/staar-wars-09.mp3",
-"name": "Staar Wars 09",
-"at": "0:28"
-},
-{
 "id": "staar-10",
 "file": "clips/staar-wars-10.mp3",
 "name": "Jouw moeder",
@@ -71,12 +41,6 @@
 "file": "clips/staar-wars-12.mp3",
 "name": "Fucking awesome",
 "at": "0:36"
-},
-{
-"id": "staar-13",
-"file": "clips/staar-wars-13.mp3",
-"name": "Staar Wars 13",
-"at": "0:41"
 },
 {
 "id": "staar-14",
@@ -107,12 +71,6 @@
 "file": "clips/staar-wars-18.mp3",
 "name": "Follow the leader",
 "at": "0:57"
-},
-{
-"id": "staar-19",
-"file": "clips/staar-wars-19.mp3",
-"name": "Staar Wars 19",
-"at": "1:02"
 },
 {
 "id": "staar-20",
@@ -167,12 +125,6 @@
 "file": "clips/staar-wars-28.mp3",
 "name": "Huaahahh",
 "at": "1:29"
-},
-{
-"id": "staar-29",
-"file": "clips/staar-wars-29.mp3",
-"name": "Staar Wars 29",
-"at": "1:31"
 },
 {
 "id": "staar-30",
@@ -257,22 +209,20 @@
 "file": "clips/staar-wars-43-44.mp3",
 "name": "Ik hoop dat je zal branden",
 "at": "2:21"
-},
-{
-"id": "staar-45",
-"file": "clips/staar-wars-45.mp3",
-"name": "Staar Wars 45",
-"at": "2:27"
-},
-{
-"id": "staar-46",
-"file": "clips/staar-wars-46.mp3",
-"name": "Staar Wars 46",
-"at": "2:31"
 }
 ],
 "remove": [
+"staar-01",
+"staar-02",
+"staar-07",
+"staar-08",
+"staar-09",
+"staar-13",
+"staar-19",
+"staar-29",
 "staar-43",
-"staar-44"
+"staar-44",
+"staar-45",
+"staar-46"
 ]
 }
