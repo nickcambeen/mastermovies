@@ -339,8 +339,10 @@ addEventListener("keydown",e=>{
 
 /* ---------- meegeleverde fragmenten ---------- */
 async function seedPresets(){
-  let list;try{list=await (await fetch("clips/presets.json")).json()}catch(e){return}
+  let data;try{data=await (await fetch("clips/presets.json",{cache:"no-cache"})).json()}catch(e){return}
+  const list=Array.isArray(data)?data:(data.clips||[]),retire=Array.isArray(data)?[]:(data.remove||[]);
   let seeded=[];try{seeded=JSON.parse(localStorage.getItem("mb-seeded")||"[]")}catch(_){}
+  if(retire.some(id=>sounds.some(s=>s.id===id))){for(const id of retire){stopId(id);buffers.delete(id);await dbDel(id)}sounds=sounds.filter(s=>!retire.includes(s.id));render()}
   const have=new Set(sounds.map(s=>s.id)),todo=list.filter(p=>!have.has(p.id)&&!seeded.includes(p.id));
   if(!todo.length)return;
   notice(`Fragmenten laden… 0/${todo.length}`);
