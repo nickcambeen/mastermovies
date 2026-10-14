@@ -343,6 +343,12 @@ async function seedPresets(){
   const list=Array.isArray(data)?data:(data.clips||[]),retire=Array.isArray(data)?[]:(data.remove||[]);
   let seeded=[];try{seeded=JSON.parse(localStorage.getItem("mb-seeded")||"[]")}catch(_){}
   if(retire.some(id=>sounds.some(s=>s.id===id))){for(const id of retire){stopId(id);buffers.delete(id);await dbDel(id)}sounds=sounds.filter(s=>!retire.includes(s.id));render()}
+  // namen bijwerken voor fragmenten die de gebruiker zelf niet heeft hernoemd
+  let renamed=false;
+  for(const p of list){const s=sounds.find(x=>x.id===p.id);if(!s||s.name===p.name)continue;
+    const untouched=s.presetName?s.name===s.presetName:/^Staar Wars \d+/.test(s.name);
+    if(untouched){s.name=p.name;s.presetName=p.name;await dbPut(s);renamed=true}}
+  if(renamed)render();
   const have=new Set(sounds.map(s=>s.id)),todo=list.filter(p=>!have.has(p.id)&&!seeded.includes(p.id));
   if(!todo.length)return;
   notice(`Fragmenten laden… 0/${todo.length}`);
@@ -350,7 +356,7 @@ async function seedPresets(){
   for(const p of todo){
     try{
       const blob=await (await fetch(p.file)).blob(),b=await decode(blob);
-      const s={id:p.id,name:p.name,src:p.at,blob,color:COLORS[(sounds.length)%COLORS.length],key:freeKey(),start:0,end:+b.duration.toFixed(2),gain:1,created:Date.now()+n};
+      const s={id:p.id,name:p.name,presetName:p.name,src:p.at,blob,color:COLORS[(sounds.length)%COLORS.length],key:freeKey(),start:0,end:+b.duration.toFixed(2),gain:1,created:Date.now()+n};
       buffers.set(s.id,b);sounds.push(s);await dbPut(s);seeded.push(p.id);
     }catch(e){}
     notice(`Fragmenten laden… ${++n}/${todo.length}`);

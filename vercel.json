@@ -1,0 +1,6 @@
+{
+  "headers": [
+    { "source": "/(index.html|clips/presets.json)?", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
+    { "source": "/clips/presets.json", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
+  ]
+}
