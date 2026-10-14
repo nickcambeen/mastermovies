@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>Mastermovies Soundboard</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: één sampler-paneel — kopbalk met transport, daaronder een raster van drukpads, editor als overlay */
+:root{
+  --bg:#141210; --panel:#1e1b18; --panel-2:#2a2622; --line:#3a342e;
+  --fg:#efe7dc; --muted:#a39a8e; --accent:#ffb12b; --danger:#ff5a4e;
+  --f-display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.45;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:1100px;margin:0 auto;display:grid;gap:18px}
+header{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:end;justify-content:space-between}
+h1{font-family:var(--f-display);font-weight:900;font-size:clamp(2.2rem,6vw,3.6rem);line-height:.9;margin:0;letter-spacing:.01em;text-transform:uppercase;text-wrap:balance}
+h1 span{color:var(--accent)}
+.sub{color:var(--muted);margin:6px 0 0;max-width:52ch}
+.transport{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.lbl{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+button,.btn{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--panel-2);color:var(--fg);border-radius:8px;padding:9px 14px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+button:hover,.btn:hover{border-color:var(--muted)}
+button:focus-visible,.btn:focus-within,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.primary{background:var(--accent);border-color:var(--accent);color:#1a1206}
+.primary:hover{filter:brightness(1.08);border-color:var(--accent)}
+.stop{border-color:var(--danger);color:var(--danger);background:transparent}
+.btn input{position:absolute;width:1px;height:1px;opacity:0}
+.btn{position:relative}
+input[type=range]{accent-color:var(--accent);width:110px}
+.check{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:14px}
+.check input{accent-color:var(--accent)}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.search{flex:1 1 220px;max-width:340px;background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:9px 12px;font:inherit}
+.notice{font-size:14px;color:var(--muted)}
+.notice b{color:var(--accent);font-weight:600}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.pad{position:relative;aspect-ratio:1/1;max-width:100%;border-radius:12px;border:none;padding:0;cursor:pointer;background:var(--pc);color:#140f08;display:flex;flex-direction:column;justify-content:space-between;text-align:left;overflow:hidden;box-shadow:inset 0 -6px 0 rgba(0,0,0,.25),0 2px 0 rgba(0,0,0,.4);transition:transform .06s}
+.pad:active,.pad.hit{transform:translateY(3px);box-shadow:inset 0 -3px 0 rgba(0,0,0,.25)}
+.pad .top{display:flex;justify-content:space-between;align-items:start;padding:10px 10px 0}
+.key{font-family:var(--f-mono);font-size:12px;background:rgba(0,0,0,.22);color:#fff8ee;border-radius:5px;padding:2px 7px;min-width:24px;text-align:center}
+.tag{font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;background:rgba(255,255,255,.35);border-radius:4px;padding:2px 6px}
+.name{font-family:var(--f-display);font-weight:700;font-size:1.45rem;line-height:1;padding:0 10px 14px;text-transform:uppercase;overflow-wrap:anywhere;text-wrap:balance}
+.dur{font-family:var(--f-mono);font-size:11px;opacity:.7;padding:0 10px;font-variant-numeric:tabular-nums}
+.prog{position:absolute;left:0;bottom:0;height:6px;background:rgba(0,0,0,.45);width:0}
+.edit{position:absolute;right:8px;top:36px;opacity:0;background:rgba(0,0,0,.35);color:#fff;border:none;padding:4px 8px;font-size:12px;border-radius:6px}
+.pad:hover .edit,.pad:focus-within .edit{opacity:1}
+@media (hover:none){.edit{opacity:1}}
+.empty{border:2px dashed var(--line);border-radius:12px;padding:28px;color:var(--muted);text-align:center}
+
+/* drop overlay */
+.drop{position:fixed;inset:0;background:rgba(20,18,16,.85);display:grid;place-items:center;z-index:30;font-family:var(--f-display);font-size:2.4rem;text-transform:uppercase;color:var(--accent);border:4px dashed var(--accent)}
+
+/* editor */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:40;display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));overflow:auto}
+.dlg{background:var(--panel);border:1px solid var(--line);border-radius:14px;width:min(640px,100%);padding:20px;display:grid;gap:14px}
+.dlg h2{font-family:var(--f-display);font-weight:900;font-size:1.8rem;text-transform:uppercase;margin:0}
+.wave-box{position:relative;background:var(--bg);border:1px solid var(--line);border-radius:8px;height:120px;touch-action:none;user-select:none}
+.wave-box canvas{width:100%;height:100%;display:block}
+.handle{position:absolute;top:0;bottom:0;width:14px;margin-left:-7px;cursor:ew-resize}
+.handle::after{content:"";position:absolute;left:6px;top:0;bottom:0;width:2px;background:var(--accent)}
+.handle::before{content:"";position:absolute;left:1px;top:0;width:12px;height:12px;background:var(--accent);border-radius:0 0 3px 3px}
+.shade{position:absolute;top:0;bottom:0;background:rgba(0,0,0,.6);pointer-events:none}
+.playhead{position:absolute;top:0;bottom:0;width:1px;background:var(--fg);pointer-events:none}
+.row{display:flex;flex-wrap:wrap;gap:12px}
+.field{display:grid;gap:4px;flex:1 1 140px;min-width:0}
+.field input,.field select{background:var(--bg);border:1px solid var(--line);color:var(--fg);border-radius:8px;padding:9px 10px;font:inherit;width:100%;font-variant-numeric:tabular-nums}
+.swatches{display:flex;gap:8px;flex-wrap:wrap}
+.sw{width:30px;height:30px;border-radius:50%;border:2px solid transparent;padding:0;background:var(--c)}
+.sw[aria-pressed=true]{border-color:var(--fg);box-shadow:0 0 0 2px var(--panel) inset}
+.actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between}
+.actions .r{display:flex;gap:10px;flex-wrap:wrap}
+.confirm{display:flex;gap:8px;align-items:center;color:var(--danger);font-size:14px;flex-wrap:wrap}
+.err{color:var(--danger);font-size:14px}
+.help{color:var(--muted);font-size:13.5px;max-width:65ch}
+.help kbd{font-family:var(--f-mono);font-size:12px;border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--fg)}
+@media (prefers-reduced-motion:reduce){.pad{transition:none}}
+.selbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:var(--panel);border:1px solid var(--accent);border-radius:10px;padding:10px 12px}
+.selbar b{color:var(--accent)}
+.selbar .r{display:flex;flex-wrap:wrap;gap:8px}
+.selbar textarea{width:100%;min-height:90px;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:8px;font-family:var(--f-mono);font-size:12px}
+.pad.sel{cursor:default}
+.pad .chk{width:22px;height:22px;accent-color:#140f08}
+.pad.marked{filter:grayscale(1) brightness(.55)}
+.pad .nm{margin:0 8px 8px;width:calc(100% - 16px);background:rgba(255,255,255,.55);border:none;border-radius:6px;padding:5px 7px;font:600 13px var(--f-body);color:#140f08}
+.pad .pl{background:rgba(0,0,0,.25);color:#fff;border:none;padding:4px 9px;font-size:12px;border-radius:6px}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Master<span>board</span></h1>
+      <p class="sub">Je eigen soundboard met quotes en geluiden uit Mastermovies-video's. Sleep een audio- of videofragment hierheen, knip het stuk dat je wilt en geef het een toets.</p>
+    </div>
+    <div class="transport">
+      <label class="btn primary" for="file">＋ Geluid toevoegen<input id="file" type="file" accept="audio/*,video/*" multiple></label>
+      <button class="stop" id="stopAll" title="Spatie">■ Stop alles</button>
+      <span class="lbl">Volume</span><input id="vol" type="range" min="0" max="1" step="0.01" value="0.9" aria-label="Volume">
+      <label class="check"><input id="overlap" type="checkbox" checked> Overlappen</label>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <input class="search" id="q" type="search" placeholder="Zoek een geluid…" aria-label="Zoeken">
+    <span class="notice" id="notice"></span>
+    <button id="selToggle">☑ Opschonen</button>
+  </div>
+  <div class="selbar" id="selbar" hidden>
+    <span><b id="selCount">0</b> aangevinkt om te verwijderen. Typ ook gerust een naam in een pad.</span>
+    <div class="r">
+      <button id="selAll">Alles aan/uit</button>
+      <button id="selCopy">Kopieer lijst voor Claude</button>
+      <button class="stop" id="selDel">Verwijder aangevinkte</button>
+      <button class="primary" id="selDone">Klaar</button>
+    </div>
+    <textarea id="selOut" readonly hidden aria-label="Lijst"></textarea>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <p class="help">Tips: druk de toets op een pad om af te spelen, <kbd>Spatie</kbd> stopt alles. Ook video's (.mp4, .mov, .webm) werken: alleen het geluid wordt gebruikt. Geluiden blijven bewaard in deze browser op dit apparaat. Fragmenten haal je zelf uit de video's, bijvoorbeeld met een schermopname of een audio-editor.</p>
+</div>
+
+<div class="drop" id="drop" hidden>Laat los om toe te voegen</div>
+
+<div class="ov" id="ov" hidden>
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
+    <h2 id="dlgTitle">Geluid bewerken</h2>
+    <div class="wave-box" id="wave">
+      <canvas id="cv"></canvas>
+      <div class="shade" id="shL"></div><div class="shade" id="shR"></div>
+      <div class="playhead" id="ph" hidden></div>
+      <div class="handle" id="hS" tabindex="0" aria-label="Begin"></div>
+      <div class="handle" id="hE" tabindex="0" aria-label="Einde"></div>
+    </div>
+    <div class="row">
+      <div class="field"><span class="lbl">Naam</span><input id="fName" maxlength="40"></div>
+      <div class="field" style="flex:0 1 110px"><span class="lbl">Toets</span><select id="fKey"></select></div>
+    </div>
+    <div class="row">
+      <div class="field"><span class="lbl">Begin (s)</span><input id="fStart" type="number" step="0.01" min="0"></div>
+      <div class="field"><span class="lbl">Einde (s)</span><input id="fEnd" type="number" step="0.01" min="0"></div>
+      <div class="field"><span class="lbl">Volume pad</span><input id="fGain" type="range" min="0.1" max="2" step="0.05"></div>
+    </div>
+    <div class="field"><span class="lbl">Kleur</span><div class="swatches" id="sw"></div></div>
+    <div class="err" id="dErr" hidden></div>
+    <div class="actions">
+      <div class="r" id="delWrap"><button class="stop" id="del">Verwijderen</button></div>
+      <div class="r">
+        <button id="prev">▶ Voorbeluisteren</button>
+        <button id="cancel">Annuleren</button>
+        <button class="primary" id="save">Opslaan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const COLORS=["#ffb12b","#ff6f4e","#ff8fb1","#c8a2ff","#6fb8ff","#4fd6b3","#a8e05f","#f2e8d5"];
+const KEYS="1234567890QWERTYUIOPASDFGHJKLZXCVBNM".split("");
+const $=id=>document.getElementById(id);
+let ctx, master, sounds=[], buffers=new Map(), playing=new Map(), editing=null, editBuf=null, previewSrc=null;
+
+/* ---------- audio ---------- */
+function ac(){if(!ctx){ctx=new (window.AudioContext||window.webkitAudioContext)();master=ctx.createGain();master.gain.value=+$("vol").value;master.connect(ctx.destination);}if(ctx.state==="suspended")ctx.resume();return ctx;}
+async function decode(blob){const ab=await blob.arrayBuffer();return await new Promise((res,rej)=>ac().decodeAudioData(ab,res,rej));}
+async function getBuf(s){if(buffers.has(s.id))return buffers.get(s.id);const b=s.demo?makeDemo(s.demo):await decode(s.blob);buffers.set(s.id,b);return b;}
+function stopId(id){(playing.get(id)||[]).forEach(p=>{try{p.src.stop()}catch(e){}});playing.delete(id);}
+function stopAll(){[...playing.keys()].forEach(stopId);stopPreview();}
+async function play(s){
+  ac();let b;try{b=await getBuf(s)}catch(e){notice("Dit bestand kan niet worden afgespeeld.");return}
+  if(!$("overlap").checked)stopAll();else stopId(s.id);
+  const src=ctx.createBufferSource(),g=ctx.createGain();src.buffer=b;g.gain.value=s.gain??1;src.connect(g).connect(master);
+  const st=Math.min(s.start||0,b.duration),en=Math.min(s.end||b.duration,b.duration),d=Math.max(0.01,en-st);
+  src.start(0,st,d);const rec={src,t0:ctx.currentTime,d};
+  playing.set(s.id,[...(playing.get(s.id)||[]),rec]);
+  src.onended=()=>{const l=(playing.get(s.id)||[]).filter(r=>r!==rec);l.length?playing.set(s.id,l):playing.delete(s.id)};
+  const el=document.querySelector(`.pad[data-id="${s.id}"]`);if(el){el.classList.add("hit");setTimeout(()=>el.classList.remove("hit"),110)}
+}
+function tick(){document.querySelectorAll(".pad").forEach(el=>{const l=playing.get(el.dataset.id),bar=el.querySelector(".prog");if(l&&l.length&&ctx){const r=l[l.length-1];bar.style.width=Math.min(100,(ctx.currentTime-r.t0)/r.d*100)+"%"}else bar.style.width="0"});
+  if(previewSrc&&ctx){const p=previewSrc,x=p.st+(ctx.currentTime-p.t0);if(x<p.en){$("ph").hidden=false;$("ph").style.left=(x/editBuf.duration*100)+"%"}}
+  requestAnimationFrame(tick)}
+requestAnimationFrame(tick);
+
+/* ---------- demo sounds (synthesised, examples only) ---------- */
+function makeDemo(kind){
+  const sr=44100,c=ac();const len={horn:1.4,drum:1.3,boing:0.8,buzz:0.9}[kind];const b=c.createBuffer(1,Math.floor(sr*len),sr),d=b.getChannelData(0);
+  for(let i=0;i<d.length;i++){const t=i/sr;let v=0;
+    if(kind==="horn"){const env=Math.min(1,t*30)*(t>1.2?Math.max(0,1-(t-1.2)*5):1);[440,554,659].forEach(f=>v+=((t*f%1)*2-1)*0.22);v*=env;}
+    if(kind==="drum"){const k=(o)=>{const tt=t-o;return tt>0&&tt<.3?Math.sin(2*Math.PI*(120-200*tt)*tt)*Math.exp(-tt*14):0};v=k(0)*.8+k(.22)*.8;const tt=t-.5;if(tt>0)v+=(Math.random()*2-1)*Math.exp(-tt*5)*.35;}
+    if(kind==="boing"){const f=180+120*Math.sin(t*28)*Math.exp(-t*3);v=Math.sin(2*Math.PI*f*t)*Math.exp(-t*3.5)*.8;}
+    if(kind==="buzz"){v=((t*110%1)<.5?1:-1)*.35*(t<.8?1:Math.max(0,1-(t-.8)*10));}
+    d[i]=v;}
+  return b;
+}
+const DEMOS=[{id:"demo-horn",name:"Toeter",demo:"horn",color:COLORS[0],key:"1"},{id:"demo-drum",name:"Ba-dum-tss",demo:"drum",color:COLORS[4],key:"2"},{id:"demo-boing",name:"Boing",demo:"boing",color:COLORS[5],key:"3"},{id:"demo-buzz",name:"Fout!",demo:"buzz",color:COLORS[1],key:"4"}];
+
+/* ---------- storage (IndexedDB) ---------- */
+let db=null;
+function openDB(){return new Promise(res=>{try{const r=indexedDB.open("masterboard",1);r.onupgradeneeded=()=>r.result.createObjectStore("sounds",{keyPath:"id"});r.onsuccess=()=>res(r.result);r.onerror=()=>res(null)}catch(e){res(null)}})}
+function tx(mode,fn){return new Promise(res=>{if(!db)return res(null);try{const t=db.transaction("sounds",mode),st=t.objectStore("sounds"),r=fn(st);t.oncomplete=()=>res(r&&r.result);t.onerror=()=>res(null)}catch(e){res(null)}})}
+const dbAll=()=>tx("readonly",s=>s.getAll());
+const dbPut=o=>tx("readwrite",s=>s.put(o));
+const dbDel=id=>tx("readwrite",s=>s.delete(id));
+
+/* ---------- render ---------- */
+const own=()=>sounds.filter(s=>!s.demo);
+const visible=()=>own().length?own():DEMOS;
+const fmt=s=>s.toFixed(1)+"s";
+function render(){
+  const q=$("q").value.trim().toLowerCase(),list=visible().filter(s=>!q||s.name.toLowerCase().includes(q)),g=$("grid");
+  g.innerHTML="";
+  if(!list.length){g.innerHTML=`<div class="empty" style="grid-column:1/-1">Geen geluid gevonden voor “${esc(q)}”.</div>`;return}
+  if(selMode){list.forEach(s=>{const el=document.createElement("div");el.className="pad sel"+(marked.has(s.id)?" marked":"");el.dataset.id=s.id;el.style.setProperty("--pc",s.color);
+      el.innerHTML=`<div class="top"><input type="checkbox" class="chk" id="c-${s.id}" ${marked.has(s.id)?"checked":""} aria-label="Verwijder ${esc(s.name)}"><button class="pl">▶</button></div><div><div class="dur">${(s.src?"@"+s.src+" · ":"")+fmt((s.end||0)-(s.start||0))}</div><input class="nm" id="n-${s.id}" value="${esc(s.name)}" maxlength="40" aria-label="Naam"></div><div class="prog"></div>`;
+      el.querySelector(".chk").addEventListener("change",e=>{e.target.checked?marked.add(s.id):marked.delete(s.id);el.classList.toggle("marked",e.target.checked);$("selCount").textContent=marked.size});
+      el.querySelector(".pl").addEventListener("click",()=>play(s));
+      el.querySelector(".nm").addEventListener("change",async e=>{const v=e.target.value.trim();if(v){s.name=v;await dbPut(s)}});
+      g.appendChild(el)});$("selCount").textContent=marked.size;return}
+  list.forEach(s=>{const el=document.createElement("div");el.className="pad";el.dataset.id=s.id;el.style.setProperty("--pc",s.color);el.tabIndex=0;el.setAttribute("role","button");el.setAttribute("aria-label","Speel "+s.name);
+    const dur=s.demo?"":(s.src?"@"+s.src+" · ":"")+fmt((s.end||0)-(s.start||0));
+    el.innerHTML=`<div class="top"><span class="key">${s.key||"·"}</span>${s.demo?'<span class="tag">Voorbeeld</span>':""}</div>${s.demo?"":'<button class="edit" aria-label="Bewerk">Bewerk</button>'}<div><div class="dur">${dur}</div><div class="name">${esc(s.name)}</div></div><div class="prog"></div>`;
+    el.addEventListener("click",e=>{if(e.target.closest(".edit")){openEditor(s);return}play(s)});
+    el.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();play(s)}});
+    g.appendChild(el)});
+  notice(own().length?`${own().length} geluid${own().length===1?"":"en"}`:"<b>Voorbeeldpads.</b> Voeg je eerste fragment toe, dan verdwijnen deze.",true);
+}
+function notice(t,html){html?$("notice").innerHTML=t:$("notice").textContent=t}
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* ---------- adding files ---------- */
+function freeKey(except){const used=new Set(own().filter(s=>s.id!==except).map(s=>s.key));return KEYS.find(k=>!used.has(k))||""}
+async function addFiles(files){
+  for(const f of files){
+    if(!/^(audio|video)\//.test(f.type)&&!/\.(mp3|wav|ogg|m4a|aac|mp4|mov|webm|flac)$/i.test(f.name))continue;
+    let b;try{b=await decode(f)}catch(e){notice(`“${f.name}” kan niet worden gelezen. Probeer mp3, wav, m4a of mp4.`);continue}
+    const s={id:"s"+Date.now()+Math.random().toString(36).slice(2,6),name:f.name.replace(/\.[^.]+$/,"").slice(0,40),blob:f,color:COLORS[own().length%COLORS.length],key:freeKey(),start:0,end:+b.duration.toFixed(2),gain:1,created:Date.now()};
+    buffers.set(s.id,b);sounds.push(s);await dbPut(s);render();
+    if(files.length===1)openEditor(s,true);
+  }
+}
+$("file").addEventListener("change",e=>{addFiles([...e.target.files]);e.target.value=""});
+let dragN=0;
+addEventListener("dragenter",e=>{if([...e.dataTransfer.types].includes("Files")){dragN++;$("drop").hidden=false}});
+addEventListener("dragleave",()=>{if(--dragN<=0){dragN=0;$("drop").hidden=true}});
+addEventListener("dragover",e=>e.preventDefault());
+addEventListener("drop",e=>{e.preventDefault();dragN=0;$("drop").hidden=true;addFiles([...e.dataTransfer.files])});
+
+/* ---------- editor ---------- */
+let ed={};
+async function openEditor(s,isNew){
+  editing=s;editBuf=await getBuf(s);ed={name:s.name,key:s.key,start:s.start||0,end:s.end||editBuf.duration,gain:s.gain??1,color:s.color};
+  $("dlgTitle").textContent=isNew?"Fragment knippen":"Geluid bewerken";
+  $("fName").value=ed.name;
+  const used=new Set(own().filter(x=>x.id!==s.id).map(x=>x.key));
+  $("fKey").innerHTML=`<option value="">Geen</option>`+KEYS.map(k=>`<option ${used.has(k)?"disabled":""} ${k===ed.key?"selected":""}>${k}</option>`).join("");
+  $("fStart").max=$("fEnd").max=editBuf.duration.toFixed(2);
+  $("fGain").value=ed.gain;
+  $("sw").innerHTML=COLORS.map(c=>`<button class="sw" style="--c:${c}" aria-label="Kleur ${c}" aria-pressed="${c===ed.color}" data-c="${c}"></button>`).join("");
+  $("dErr").hidden=true;resetDel();
+  $("ov").hidden=false;syncInputs();drawWave();$("fName").focus();$("fName").select();
+}
+function closeEditor(){stopPreview();$("ov").hidden=true;editing=null}
+function syncInputs(){$("fStart").value=ed.start.toFixed(2);$("fEnd").value=ed.end.toFixed(2);placeHandles()}
+function placeHandles(){const D=editBuf.duration,a=ed.start/D*100,b=ed.end/D*100;$("hS").style.left=a+"%";$("hE").style.left=b+"%";$("shL").style.cssText=`left:0;width:${a}%`;$("shR").style.cssText=`left:${b}%;right:0`}
+function drawWave(){
+  const cv=$("cv"),r=cv.getBoundingClientRect(),dpr=devicePixelRatio||1;cv.width=r.width*dpr;cv.height=r.height*dpr;
+  const g=cv.getContext("2d"),d=editBuf.getChannelData(0),W=cv.width,H=cv.height,step=Math.max(1,Math.floor(d.length/W));
+  g.clearRect(0,0,W,H);g.fillStyle=ed.color;
+  for(let x=0;x<W;x++){let mn=1,mx=-1;const o=x*step;for(let i=0;i<step;i+=Math.ceil(step/64)){const v=d[o+i]||0;if(v<mn)mn=v;if(v>mx)mx=v}g.fillRect(x,(1-mx)*H/2,1,Math.max(1,(mx-mn)*H/2))}
+}
+function dragHandle(h,which){h.addEventListener("pointerdown",e=>{e.preventDefault();h.setPointerCapture(e.pointerId);const box=$("wave").getBoundingClientRect();
+  const mv=ev=>{const t=Math.max(0,Math.min(1,(ev.clientX-box.left)/box.width))*editBuf.duration;if(which==="s")ed.start=Math.min(t,ed.end-0.05);else ed.end=Math.max(t,ed.start+0.05);syncInputs()};
+  const up=()=>{h.removeEventListener("pointermove",mv);h.removeEventListener("pointerup",up)};h.addEventListener("pointermove",mv);h.addEventListener("pointerup",up)});
+  h.addEventListener("keydown",e=>{const dx=e.key==="ArrowLeft"?-0.05:e.key==="ArrowRight"?0.05:0;if(!dx)return;e.preventDefault();e.stopPropagation();if(which==="s")ed.start=Math.max(0,Math.min(ed.start+dx,ed.end-0.05));else ed.end=Math.min(editBuf.duration,Math.max(ed.end+dx,ed.start+0.05));syncInputs()})}
+dragHandle($("hS"),"s");dragHandle($("hE"),"e");
+$("fStart").addEventListener("change",e=>{ed.start=Math.max(0,Math.min(+e.target.value||0,ed.end-0.05));syncInputs()});
+$("fEnd").addEventListener("change",e=>{ed.end=Math.min(editBuf.duration,Math.max(+e.target.value||0,ed.start+0.05));syncInputs()});
+$("fGain").addEventListener("input",e=>ed.gain=+e.target.value);
+$("sw").addEventListener("click",e=>{const b=e.target.closest(".sw");if(!b)return;ed.color=b.dataset.c;$("sw").querySelectorAll(".sw").forEach(x=>x.setAttribute("aria-pressed",x===b));drawWave()});
+function stopPreview(){if(previewSrc){try{previewSrc.src.stop()}catch(e){}previewSrc=null}$("ph").hidden=true;$("prev").textContent="▶ Voorbeluisteren"}
+$("prev").addEventListener("click",()=>{if(previewSrc){stopPreview();return}ac();const src=ctx.createBufferSource(),g=ctx.createGain();src.buffer=editBuf;g.gain.value=ed.gain;src.connect(g).connect(master);src.start(0,ed.start,ed.end-ed.start);previewSrc={src,t0:ctx.currentTime,st:ed.start,en:ed.end};src.onended=()=>{if(previewSrc&&previewSrc.src===src)stopPreview()};$("prev").textContent="■ Stop"});
+$("cancel").addEventListener("click",closeEditor);
+$("ov").addEventListener("click",e=>{if(e.target===$("ov"))closeEditor()});
+$("save").addEventListener("click",async()=>{const name=$("fName").value.trim();if(!name){$("dErr").textContent="Geef het geluid een naam.";$("dErr").hidden=false;return}
+  Object.assign(editing,{name,key:$("fKey").value,start:+ed.start.toFixed(2),end:+ed.end.toFixed(2),gain:ed.gain,color:ed.color});await dbPut(editing);closeEditor();render()});
+function resetDel(){$("delWrap").innerHTML='<button class="stop" id="del">Verwijderen</button>';$("del").onclick=()=>{$("delWrap").innerHTML='<span class="confirm">Zeker weten? <button class="stop" id="delY">Ja, verwijder</button><button id="delN">Nee</button></span>';$("delY").onclick=async()=>{const id=editing.id;stopId(id);sounds=sounds.filter(s=>s.id!==id);buffers.delete(id);await dbDel(id);closeEditor();render()};$("delN").onclick=resetDel}}
+addEventListener("resize",()=>{if(!$("ov").hidden)drawWave()});
+
+/* ---------- opschonen ---------- */
+let selMode=false;const marked=new Set();
+function setSel(on){selMode=on&&own().length>0;$("selbar").hidden=!selMode;$("selOut").hidden=true;$("selToggle").hidden=selMode;render()}
+$("selToggle").addEventListener("click",()=>setSel(true));
+$("selDone").addEventListener("click",()=>setSel(false));
+$("selAll").addEventListener("click",()=>{const ids=own().map(s=>s.id);if(ids.every(i=>marked.has(i)))marked.clear();else ids.forEach(i=>marked.add(i));render()});
+$("selDel").addEventListener("click",async()=>{for(const id of marked){stopId(id);sounds=sounds.filter(s=>s.id!==id);buffers.delete(id);await dbDel(id)}marked.clear();if(!own().length)setSel(false);else render()});
+$("selCopy").addEventListener("click",()=>{
+  const keep=own().filter(s=>!marked.has(s.id)),gone=own().filter(s=>marked.has(s.id));
+  const txt="WEG: "+(gone.map(s=>s.id).join(", ")||"geen")+"\nHOUDEN:\n"+keep.map(s=>`${s.id} = ${s.name}`).join("\n");
+  const out=$("selOut");out.value=txt;out.hidden=false;
+  const done=()=>{$("selCopy").textContent="Gekopieerd ✓";setTimeout(()=>$("selCopy").textContent="Kopieer lijst voor Claude",1600)};
+  try{navigator.clipboard.writeText(txt).then(done,()=>{out.select()})}catch(e){out.select()}
+});
+
+/* ---------- controls & keys ---------- */
+$("stopAll").addEventListener("click",stopAll);
+$("vol").addEventListener("input",e=>{if(master)master.gain.value=+e.target.value;try{localStorage.setItem("mb-vol",e.target.value)}catch(_){}});
+$("overlap").addEventListener("change",e=>{try{localStorage.setItem("mb-ov",e.target.checked?"1":"0")}catch(_){}});
+$("q").addEventListener("input",render);
+addEventListener("keydown",e=>{
+  if(!$("ov").hidden){if(e.key==="Escape")closeEditor();return}
+  if(e.target.matches("input,select,textarea")||e.metaKey||e.ctrlKey||e.altKey)return;
+  if(e.code==="Space"){e.preventDefault();stopAll();return}
+  const k=e.key.toUpperCase(),s=visible().find(x=>x.key===k);if(s&&!e.repeat){e.preventDefault();play(s)}
+});
+
+/* ---------- boot ---------- */
+(async()=>{
+  try{const v=localStorage.getItem("mb-vol");if(v)$("vol").value=v;const o=localStorage.getItem("mb-ov");if(o)$("overlap").checked=o==="1"}catch(_){}
+  render();
+  db=await openDB();
+  if(!db){notice("Opslaan lukt niet in deze browser; geluiden blijven alleen staan tot je de pagina sluit.");return}
+  sounds=(await dbAll()||[]).sort((a,b)=>a.created-b.created);render();
+  await seedPresets();
+})();
+
+/* ---------- meegeleverde fragmenten ---------- */
+async function seedPresets(){
+  let list;try{list=await (await fetch("clips/presets.json")).json()}catch(e){return}
+  let seeded=[];try{seeded=JSON.parse(localStorage.getItem("mb-seeded")||"[]")}catch(_){}
+  const have=new Set(sounds.map(s=>s.id)),todo=list.filter(p=>!have.has(p.id)&&!seeded.includes(p.id));
+  if(!todo.length)return;
+  notice(`Fragmenten laden… 0/${todo.length}`);
+  let n=0;
+  for(const p of todo){
+    try{
+      const blob=await (await fetch(p.file)).blob(),b=await decode(blob);
+      const s={id:p.id,name:p.name,src:p.at,blob,color:COLORS[(sounds.length)%COLORS.length],key:freeKey(),start:0,end:+b.duration.toFixed(2),gain:1,created:Date.now()+n};
+      buffers.set(s.id,b);sounds.push(s);await dbPut(s);seeded.push(p.id);
+    }catch(e){}
+    notice(`Fragmenten laden… ${++n}/${todo.length}`);
+  }
+  try{localStorage.setItem("mb-seeded",JSON.stringify(seeded))}catch(_){}
+  render();
+}
+</script>
+
+</body>
+</html>
